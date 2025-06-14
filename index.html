@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Footnotes — Prototype v5 (fixed underline)</title>
+
+    <!-- Google Font (Playfair Display resembles Noe Display) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
+
+    <style>
+      /* ============ CSS Variables ============ */
+      :root {
+        --blue: #0066ff;
+        --green: #10b981;
+        --bg: #f4f6fa;
+        --panel-bg: #ffffff;
+      }
+
+      /* ============ Base Layout ============ */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden; /* hide page scroll */
+        font-family: "Playfair Display", serif;
+        background: var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.06);
+        background: var(--panel-bg);
+      }
+
+      /* ============ Essay (top) ============ */
+      #essayWrapper {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 1rem 1.125rem 4rem;
+        line-height: 1.6;
+        font-size: 1.1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE */
+        overscroll-behavior: contain;
+      }
+      #essayWrapper::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+
+      /* ============ NEW: Animated multi‑line underline ============ */
+      .annotated {
+        position: relative;
+        /* The under‑line is painted with a background so it can span
+           across every wrapped line, something ::after can’t do. */
+        background-image: linear-gradient(currentColor, currentColor);
+        background-position: 0 100%;            /* stick to bottom */
+        background-repeat: no-repeat;
+        background-size: 0% 2px;                /* start hidden */
+        transition: background-size 3s ease;    /* slow glide */
+      }
+      .annotated.visible {
+        background-size: 100% 2px;              /* reveal */
+      }
+
+      /* Alternating colors */
+      .color-blue {
+        color: var(--blue);
+      }
+      .color-green {
+        color: var(--green);
+      }
+
+      /* ============ Annotation Panel (bottom) ============ */
+      #annotationPanel {
+        flex: 0 0 38vh;
+        max-height: 45vh;
+        padding: 1rem 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        background: var(--panel-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      #annotationText {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        text-align: center;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #annotationText.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .annotationItem {
+        margin-bottom: 0.75rem;
+        font-size: 1.05rem;
+        line-height: 1.45;
+      }
+      .annotationItem:last-child {
+        margin-bottom: 0;
+      }
+
+      .placeholder {
+        color: #999;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="scrollProxy">
+      <!-- Top: Essay -->
+      <div id="essayWrapper">
+        <!-- Example essay duplicated for length -->
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae justo quis leo bibendum scelerisque.
+          <span class="annotated color-blue" data-note="Dolor sit amet means ‘pain itself’, coined from Cicero’s 45 BC text.">Quisque euismod malesuada odio, a placerat ligula commodo at.</span>
+          Mauris non libero placerat, dictum elit at, ultricies metus.
+        </p>
+
+        <p>
+          Suspendisse interdum, massa nec pretium aliquet, libero ligula eleifend lectus, quis eleifend neque nulla quis augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi vulputate diam sed felis lacinia pharetra.
+        </p>
+
+        <p>
+          Phasellus pretium, odio a dignissim vestibulum, mauris lectus condimentum mi, sit amet laoreet enim turpis vel metus. Integer vitae consequat lectus.
+          <span class="annotated color-green" data-note="Phasellus pretium appears often in classic CSS docs.">Nam fermentum nisl sed nisi venenatis, sed faucibus lectus interdum.</span>
+          Nulla facilisi. In ut gravida arcu.
+        </p>
+
+        <p>
+          Curabitur semper eros eu orci facilisis, vitae tempor dui imperdiet. Praesent sollicitudin ultricies mi, at gravida nisl iaculis quis. Duis tempus magna neque, nec lacinia nibh viverra nec.
+        </p>
+
+        <p>
+          Sed tincidunt, nisi et viverra condimentum, elit urna interdum est, a tempor nulla orci et diam.
+          <span class="annotated color-blue" data-note="‘Aliquam erat volutpat’ is Latin for ‘Done deal’.">Aliquam erat volutpat.</span>
+          Quisque sed dolor auctor, dapibus tortor id, molestie arcu.
+        </p>
+
+        <p>
+          Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper.
+        </p>
+
+        <p>
+          Aenean ultricies mi vitae est. Mauris placerat eleifend leo.
+          <span class="annotated color-green" data-note="Aenean ultricies: indicates responsive typography patterns.">Quisque sit amet est et sapien ullamcorper pharetra.</span>
+          Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.
+        </p>
+
+        <!-- Duplicate content for more scroll -->
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae justo quis leo bibendum scelerisque. Quisque euismod malesuada odio, a placerat ligula commodo at. Mauris non libero placerat, dictum elit at, ultricies metus.
+        </p>
+        <p>
+          Suspendisse interdum, massa nec pretium aliquet, libero ligula eleifend lectus, quis eleifend neque nulla quis augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi vulputate diam sed felis lacinia pharetra.
+        </p>
+        <p>
+          Phasellus pretium, odio a dignissim vestibulum, mauris lectus condimentum mi, sit amet laoreet enim turpis vel metus. Integer vitae consequat lectus. Nam fermentum nisl sed nisi venenatis, sed faucibus lectus interdum. Nulla facilisi. In ut gravida arcu.
+        </p>
+        <p>
+          Curabitur semper eros eu orci facilisis, vitae tempor dui imperdiet. Praesent sollicitudin ultricies mi, at gravida nisl iaculis quis. Duis tempus magna neque, nec lacinia nibh viverra nec.
+        </p>
+      </div>
+
+      <!-- Bottom: Annotation display -->
+      <div id="annotationPanel">
+        <div id="annotationText" class="placeholder">Scroll to see annotations</div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const essayWrapper = document.getElementById("essayWrapper");
+        const annotatedSpans = Array.from(document.querySelectorAll(".annotated"));
+        const annotationText = document.getElementById("annotationText");
+        const scrollProxy = document.getElementById("scrollProxy");
+
+        /* === 1. Proxy scroll wheel / touch anywhere === */
+        // Wheel (desktop & touchpad)
+        scrollProxy.addEventListener(
+          "wheel",
+          (e) => {
+            e.preventDefault();
+            essayWrapper.scrollTop += e.deltaY;
+          },
+          { passive: false }
+        );
+
+        // Touch (mobile)
+        let lastY = null;
+        scrollProxy.addEventListener("touchstart", (e) => {
+          lastY = e.touches[0].clientY;
+        });
+        scrollProxy.addEventListener(
+          "touchmove",
+          (e) => {
+            if (lastY === null) return;
+            const currentY = e.touches[0].clientY;
+            const dy = lastY - currentY;
+            essayWrapper.scrollTop += dy;
+            lastY = currentY;
+          },
+          { passive: false }
+        );
+        scrollProxy.addEventListener("touchend", () => (lastY = null));
+
+        /* === 2. Helper — check visibility manually === */
+        function refreshVisible() {
+          const wrapperRect = essayWrapper.getBoundingClientRect();
+
+          annotatedSpans.forEach((span) => {
+            const spanRect = span.getBoundingClientRect();
+            const visible =
+              spanRect.bottom > wrapperRect.top && spanRect.top < wrapperRect.bottom;
+            span.classList.toggle("visible", visible);
+          });
+
+          // Build annotation HTML for visible spans (DOM order)
+          const visibleSpans = annotatedSpans.filter((s) => s.classList.contains("visible"));
+          const html = visibleSpans
+            .map(
+              (s) =>
+                `<div class="annotationItem" style="color:${getComputedStyle(s).color}">${s.dataset.note}</div>`
+            )
+            .join("");
+          updateAnnotationDisplay(html);
+        }
+
+        function updateAnnotationDisplay(html) {
+          const currentHTML = annotationText.dataset.current || "";
+          if (html === currentHTML) return;
+
+          annotationText.classList.remove("show");
+          setTimeout(() => {
+            if (html) {
+              annotationText.innerHTML = html;
+              annotationText.classList.remove("placeholder");
+            } else {
+              annotationText.innerHTML = "Scroll to see annotations";
+              annotationText.classList.add("placeholder");
+            }
+            annotationText.dataset.current = html;
+            requestAnimationFrame(() => annotationText.classList.add("show"));
+          }, 250);
+        }
+
+        /* === 3. Initial & scroll triggers === */
+        refreshVisible();
+        essayWrapper.addEventListener("scroll", () => refreshVisible());
+      });
+    </script>
+  </body>
+</html>
